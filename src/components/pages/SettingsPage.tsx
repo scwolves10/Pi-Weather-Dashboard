@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Settings,
-  Key,
   MapPin,
   Cpu,
   Tv,
@@ -34,7 +33,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [cityQuery, setCityQuery] = useState('');
   const [cityResults, setCityResults] = useState<CitySearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState(settings.openWeatherApiKey || '');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Preset location shortcuts
@@ -70,13 +68,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     showSuccessToast();
   };
 
-  const handleSaveApiKey = () => {
-    onUpdateSettings({
-      openWeatherApiKey: apiKeyInput.trim(),
-    });
-    showSuccessToast();
-  };
-
   const showSuccessToast = () => {
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2500);
@@ -95,7 +86,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               Station Settings
             </h1>
             <p className="text-xs text-slate-300">
-              Configure OpenWeatherMap API, DHT11 GPIO, Units & Screen Brightness
+              Configure Location, DHT11 GPIO, Units & Screen Brightness
             </p>
           </div>
         </div>
@@ -108,41 +99,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* 1. OpenWeatherMap API Key & Source */}
-        <div className="bg-[#2C3E50]/80 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-            <Key size={18} className="text-orange-400" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
-              OpenWeatherMap API Key
-            </h2>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs text-slate-300 font-medium block">
-              Custom OpenWeatherMap Key (Optional)
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="password"
-                placeholder="Paste API Key here..."
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                className="flex-1 bg-[#1A252F] border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-orange-500 transition-colors"
-              />
-              <button
-                onClick={handleSaveApiKey}
-                className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer transition-all"
-              >
-                Save
-              </button>
-            </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              If left blank, system automatically uses zero-config Open-Meteo satellite weather API for worldwide forecasts.
-            </p>
-          </div>
-        </div>
-
-        {/* 2. Location Search & Presets */}
+        {/* 1. Location Search & Presets */}
         <div className="bg-[#2C3E50]/80 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-xl space-y-4">
           <div className="flex items-center gap-2 border-b border-white/10 pb-3">
             <MapPin size={18} className="text-orange-400" />

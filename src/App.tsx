@@ -18,7 +18,6 @@ import { SettingsPage } from './components/pages/SettingsPage';
 import { PiScreenOverlay } from './components/PiScreenOverlay';
 
 const DEFAULT_SETTINGS: AppSettings = {
-  openWeatherApiKey: '',
   useOpenMeteoFallback: true,
   location: {
     name: 'San Francisco, CA',
@@ -114,7 +113,6 @@ export default function App() {
     setIsRefreshing(true);
     try {
       const data = await fetchWeatherData(
-        settings.openWeatherApiKey,
         settings.location.lat,
         settings.location.lon,
         settings.location.name
@@ -146,7 +144,6 @@ export default function App() {
       setSecondsUntilRefresh(UPDATE_INTERVAL_SECONDS);
     }
   }, [
-    settings.openWeatherApiKey,
     settings.location.lat,
     settings.location.lon,
     settings.location.name,

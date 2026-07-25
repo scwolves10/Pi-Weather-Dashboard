@@ -208,7 +208,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
                   {currentWeather?.locationName || settings.location.name}
                 </h2>
                 <p className="text-xs text-slate-300 font-mono flex items-center gap-1">
-                  <span>{settings.openWeatherApiKey ? 'OpenWeather API' : 'Open-Meteo'}</span>
+                  <span>{import.meta.env.VITE_OPENWEATHER_API_KEY ? 'OpenWeather API' : 'Open-Meteo'}</span>
                   {isDay ? (
                     <span className="text-[10px] text-amber-300 font-bold bg-amber-400/20 px-1.5 py-0.2 rounded border border-amber-300/30">
                       Day

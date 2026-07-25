@@ -106,7 +106,6 @@ export interface DHT11Data {
 }
 
 export interface AppSettings {
-  openWeatherApiKey: string;
   useOpenMeteoFallback: boolean;
   location: {
     name: string;

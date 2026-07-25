@@ -582,19 +582,20 @@ async function fetchFromOpenMeteo(
 }
 
 export async function fetchWeatherData(
-  apiKey: string,
   lat: number,
   lon: number,
-  locationName: string
+  locationName: string,
+  apiKey?: string
 ): Promise<{
   current: CurrentWeather;
   hourly: HourlyForecast[];
   daily: DailyForecast[];
   alerts: WeatherAlert[];
 }> {
-  if (apiKey && apiKey.trim().length > 10) {
+  const effectiveKey = apiKey || (import.meta.env.VITE_OPENWEATHER_API_KEY as string) || '';
+  if (effectiveKey && effectiveKey.trim().length > 10) {
     try {
-      return await fetchFromOpenWeatherMap(apiKey.trim(), lat, lon, locationName);
+      return await fetchFromOpenWeatherMap(effectiveKey.trim(), lat, lon, locationName);
     } catch (err) {
       console.warn('OpenWeatherMap failed, falling back to Open-Meteo:', err);
       return await fetchFromOpenMeteo(lat, lon, locationName);
