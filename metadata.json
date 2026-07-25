@@ -1,0 +1,6 @@
+{
+  "name": "Pi Weather Station",
+  "description": "Smart-home weather dashboard for Raspberry Pi touchscreen with indoor DHT11 sensor readings, outdoor forecasts, animated weather backgrounds, alerts, and minimalist clock.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
