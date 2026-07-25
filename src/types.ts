@@ -2,6 +2,22 @@ export type TempUnit = 'C' | 'F';
 export type TimeFormat = '12h' | '24h';
 export type SpeedUnit = 'kmh' | 'mph' | 'ms';
 export type PressureUnit = 'hPa' | 'inHg';
+export type ActivePageType = 'main' | 'forecast' | 'map' | 'news' | 'settings';
+
+export interface WeatherNewsArticle {
+  id: string;
+  title: string;
+  summary: string;
+  content: string;
+  source: string;
+  url?: string;
+  publishedAt: string;
+  category: 'severe' | 'regional' | 'tropical' | 'climate' | 'general';
+  locationName?: string;
+  impactLevel?: 'High' | 'Medium' | 'Low';
+  imageUrl?: string;
+  readTimeMinutes?: number;
+}
 
 export interface CitySearchResult {
   name: string;
@@ -28,12 +44,17 @@ export interface WeatherCondition {
   icon: string;
 }
 
+export type PollenLevel = 'None' | 'Low' | 'Moderate' | 'High';
+
 export interface PollenInfo {
   tree: number; // 0 to 5
   grass: number; // 0 to 5
-  weed: number; // 0 to 5
+  ragweed: number; // 0 to 5
+  treeLevel: PollenLevel;
+  grassLevel: PollenLevel;
+  ragweedLevel: PollenLevel;
   overallIndex: number; // 0 to 5
-  overallLevel: 'Low' | 'Moderate' | 'High' | 'Very High';
+  overallLevel: PollenLevel;
 }
 
 export interface CurrentWeather {

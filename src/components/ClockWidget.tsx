@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Clock as ClockIcon, Calendar, Activity } from 'lucide-react';
-import { TimeFormat } from '../types';
+import { RefreshCw, Clock as ClockIcon, Calendar, Activity, AlertTriangle } from 'lucide-react';
+import { TimeFormat, WeatherAlert } from '../types';
 
 interface ClockWidgetProps {
   format: TimeFormat;
@@ -10,6 +10,7 @@ interface ClockWidgetProps {
   totalRefreshSeconds: number;
   onRefreshNow: () => void;
   isRefreshing?: boolean;
+  alerts?: WeatherAlert[];
 }
 
 export const ClockWidget: React.FC<ClockWidgetProps> = ({
@@ -20,6 +21,7 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({
   totalRefreshSeconds,
   onRefreshNow,
   isRefreshing = false,
+  alerts = [],
 }) => {
   const [time, setTime] = useState<Date>(new Date());
 
@@ -129,51 +131,36 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({
         </div>
       </div>
 
-      {/* 5-Minute Refresh Status & Countdown Ring (Touch Friendly) */}
-      <div className="mt-3 md:mt-0 flex items-center gap-3 bg-[#1A252F]/60 px-3.5 py-2 rounded-xl border border-white/10">
-        <div className="flex flex-col text-right">
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-300 flex items-center justify-end gap-1">
-            <Activity size={12} className="text-emerald-400 animate-pulse" />
-            Auto Sync (5m)
-          </span>
-          <span className="text-xs font-mono font-semibold text-orange-300">
-            Next in {formatCountdown(secondsUntilRefresh)}
-          </span>
+      {/* Middle Alert Notification (when active weather alerts exist) */}
+      {alerts && alerts.length > 0 && (
+        <div className="my-2 md:my-0 mx-auto md:mx-4 flex items-center gap-2.5 bg-rose-500/20 border border-rose-500/40 text-rose-100 px-3.5 py-1.5 rounded-xl text-xs font-semibold animate-pulse shadow-lg max-w-xs sm:max-w-md shrink">
+          <AlertTriangle size={18} className="text-rose-400 shrink-0" />
+          <div className="truncate">
+            <div className="flex items-center gap-1.5 font-bold text-rose-300">
+              <span className="truncate">{alerts[0].event}</span>
+              <span className="text-[10px] bg-rose-500/30 text-rose-200 px-1.5 py-0.2 rounded uppercase shrink-0 font-mono">
+                {alerts[0].severity || 'Alert'}
+              </span>
+            </div>
+            <div className="text-[11px] text-slate-200 truncate opacity-90">
+              {alerts[0].description}
+            </div>
+          </div>
         </div>
+      )}
 
-        {/* Refresh Touch Button with progress circle */}
+      {/* Refresh Touch Button */}
+      <div className="mt-3 md:mt-0 flex items-center">
         <button
           onClick={onRefreshNow}
           disabled={isRefreshing}
           title="Refresh Weather Now"
-          className="relative w-10 h-10 rounded-full bg-orange-500/10 hover:bg-orange-500/20 active:scale-95 transition-all flex items-center justify-center border border-orange-500/30 text-orange-300 hover:text-white group cursor-pointer"
+          className="w-10 h-10 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 active:scale-95 transition-all flex items-center justify-center border border-orange-500/30 text-orange-300 hover:text-white group cursor-pointer shadow-sm"
         >
           <RefreshCw
             size={18}
             className={`${isRefreshing ? 'animate-spin text-amber-400' : 'group-hover:rotate-180 transition-transform duration-500'}`}
           />
-          {/* Circular progress bar around button */}
-          <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none">
-            <circle
-              cx="20"
-              cy="20"
-              r="17"
-              className="stroke-[#1A252F]"
-              strokeWidth="2"
-              fill="none"
-            />
-            <circle
-              cx="20"
-              cy="20"
-              r="17"
-              className="stroke-orange-400 transition-all duration-1000"
-              strokeWidth="2"
-              strokeDasharray={106.8}
-              strokeDashoffset={106.8 - (106.8 * refreshPercent) / 100}
-              strokeLinecap="round"
-              fill="none"
-            />
-          </svg>
         </button>
       </div>
     </div>

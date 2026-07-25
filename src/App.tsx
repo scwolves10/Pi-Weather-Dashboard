@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  AppSettings,
-  CurrentWeather,
-  HourlyForecast,
-  DailyForecast,
-  WeatherAlert,
-  DHT11Data,
-} from './types';
+import { ActivePageType, AppSettings, CurrentWeather, HourlyForecast, DailyForecast, WeatherAlert, DHT11Data } from './types';
 import { fetchWeatherData } from './services/weatherService';
 import { dht11Simulator } from './services/dhtService';
 import { AnimatedBackground } from './components/AnimatedBackground';
@@ -14,6 +7,7 @@ import { Navigation } from './components/Navigation';
 import { MainDashboard } from './components/pages/MainDashboard';
 import { ForecastPage } from './components/pages/ForecastPage';
 import { WeatherMapPage } from './components/pages/WeatherMapPage';
+import { WeatherNewsPage } from './components/pages/WeatherNewsPage';
 import { SettingsPage } from './components/pages/SettingsPage';
 import { PiScreenOverlay } from './components/PiScreenOverlay';
 
@@ -28,7 +22,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   units: {
     temp: 'C',
     speed: 'kmh',
-    pressure: 'hPa',
+    pressure: 'inHg',
   },
   clockFormat: '12h',
   showSeconds: true,
@@ -60,7 +54,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 export default function App() {
   // Page Navigation State
-  const [activePage, setActivePage] = useState<'main' | 'forecast' | 'map' | 'settings'>('main');
+  const [activePage, setActivePage] = useState<ActivePageType>('main');
 
   // App Settings State (with localStorage persistence)
   const [settings, setSettings] = useState<AppSettings>(() => {
@@ -174,17 +168,17 @@ export default function App() {
   // Indoor DHT11 Sensor Polling Loop (Simulator + Check for Real Pi Hardware API Endpoint)
   useEffect(() => {
     const interval = setInterval(async () => {
-      // Check if real Pi Python script posted to /api/dht11
+      // Check if real Pi Python script or native node-dht-sensor posted/read /api/dht11
       try {
-        const res = await fetch('/api/dht11');
+        const res = await fetch(`/api/dht11?pin=${settings.dht11.gpioPin}`);
         if (res.ok) {
           const apiReading = await res.json();
-          if (apiReading.source === 'hardware_gpio') {
+          if (apiReading && apiReading.source && apiReading.source !== 'simulator') {
             setDhtData({
-              temperature: apiReading.temperature + settings.dht11.offsetTemp,
-              humidity: apiReading.humidity + settings.dht11.offsetHumidity,
+              temperature: Math.round((apiReading.temperature + settings.dht11.offsetTemp) * 10) / 10,
+              humidity: Math.round((apiReading.humidity + settings.dht11.offsetHumidity) * 10) / 10,
               status: 'online',
-              lastReading: new Date(apiReading.timestamp),
+              lastReading: new Date(apiReading.timestamp || Date.now()),
               gpioPin: settings.dht11.gpioPin,
               errorCount: 0,
             });
@@ -312,6 +306,10 @@ export default function App() {
               dhtData={dhtData}
               formatTemp={formatTemp}
             />
+          )}
+
+          {activePage === 'news' && (
+            <WeatherNewsPage settings={settings} />
           )}
 
           {activePage === 'settings' && (

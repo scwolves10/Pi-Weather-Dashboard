@@ -96,12 +96,10 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
         totalRefreshSeconds={totalRefreshSeconds}
         onRefreshNow={onRefreshNow}
         isRefreshing={isRefreshing}
+        alerts={alerts}
       />
 
-      {/* 2. Active Severe Weather Alert Ticker */}
-      {alerts && alerts.length > 0 && <AlertBanner alerts={alerts} />}
-
-      {/* 3. Indoor vs Outdoor Main Weather Cards (Side-by-Side Grid) */}
+      {/* 2. Indoor vs Outdoor Main Weather Cards (Side-by-Side Grid) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Indoor DHT11 Sensor Card */}
         <div className={`${cardBg} rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between group`}>
@@ -222,35 +220,8 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
               </div>
             </div>
 
-            {/* AQI & Pollen Badges & Change Location Button */}
+            {/* Location Header Change Location Button */}
             <div className="flex items-center gap-2">
-              {currentWeather && (
-                <>
-                  {/* AQI Badge */}
-                  <div
-                    className={`px-2 py-1 rounded-lg text-xs font-bold border flex items-center gap-1 backdrop-blur-sm ${
-                      getAqiStatus(currentWeather.aqi || 34).bg
-                    } ${getAqiStatus(currentWeather.aqi || 34).color} ${
-                      getAqiStatus(currentWeather.aqi || 34).border
-                    }`}
-                    title={`Air Quality Index: ${currentWeather.aqi || 34} (${
-                      getAqiStatus(currentWeather.aqi || 34).label
-                    })`}
-                  >
-                    <Activity size={12} />
-                    <span>AQI {currentWeather.aqi || 34}</span>
-                  </div>
-
-                  {/* Pollen Badge */}
-                  <div
-                    className={`px-2 py-1 rounded-lg text-xs font-bold border flex items-center gap-1 backdrop-blur-sm ${pollenStatus.bg} ${pollenStatus.color} ${pollenStatus.border}`}
-                    title={`Pollen Index: ${currentWeather.pollen?.overallIndex || 1.8}/5 (${pollenStatus.label})`}
-                  >
-                    <Sprout size={12} />
-                    <span>Pollen {pollenStatus.label}</span>
-                  </div>
-                </>
-              )}
               <button
                 onClick={onOpenSettings}
                 className="text-xs font-bold text-amber-300 hover:text-amber-200 bg-amber-400/10 hover:bg-amber-400/20 px-2.5 py-1 rounded-lg border border-amber-300/30 transition-colors cursor-pointer"
@@ -292,10 +263,10 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Animated Weather Icon & Condition Description shifted 100px left */}
+              {/* Animated Weather Icon & Condition Description shifted 5px to the right */}
               <div
                 className="absolute left-1/2 top-1/2 flex flex-col items-center justify-center z-10 pointer-events-none"
-                style={{ transform: 'translate(calc(-50% - 100px), -50%)' }}
+                style={{ transform: 'translate(calc(-50% - 50px), -50%)' }}
               >
                 <div className={`p-1.5 backdrop-blur-md rounded-2xl ${iconContainerBg}`}>
                   <WeatherIcon
@@ -327,8 +298,19 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
 
       {/* 4. Quick Metrics Grid (AQI, Pollen, Wind, UV, Pressure, Sunrise/Sunset) */}
       {currentWeather && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-          {/* Air Quality Index (AQI) Metric Card */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+              <span>Environmental & Meteorological Metrics</span>
+            </h3>
+            <span className="text-[10px] font-mono font-bold text-amber-300/90 bg-amber-400/10 border border-amber-300/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              Auto-Syncs Every 5m
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+            {/* Air Quality Index (AQI) Metric Card */}
           <div className={`${metricCardBg} rounded-xl p-3.5 flex flex-col justify-between`}>
             <div className="flex items-center justify-between text-slate-300 text-xs font-semibold">
               <span className="flex items-center gap-1">
@@ -353,7 +335,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
           </div>
 
           {/* Pollen Levels Metric Card */}
-          <div className={`${metricCardBg} rounded-xl p-3.5 flex flex-col justify-between`}>
+          <div className={`${metricCardBg} rounded-xl p-3 flex flex-col justify-between`}>
             <div className="flex items-center justify-between text-slate-300 text-xs font-semibold">
               <span className="flex items-center gap-1">
                 <Sprout size={14} className="text-lime-400" /> Pollen
@@ -362,23 +344,39 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
                 {pollenStatus.label}
               </span>
             </div>
-            <div className="my-1 flex items-baseline justify-between">
-              <div>
-                <span className="text-xl sm:text-2xl font-bold text-white">
-                  {currentWeather.pollen?.overallIndex ?? 1.8}
+
+            <div className="my-1.5 space-y-0.5 text-[11px]">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300 font-medium">Tree:</span>
+                <span className={`font-bold font-mono ${getPollenStatus(currentWeather.pollen?.treeLevel || 'Low').color}`}>
+                  {currentWeather.pollen?.treeLevel || 'Low'}
                 </span>
-                <span className="text-xs text-slate-300 font-mono"> / 5</span>
               </div>
-              <div className="text-[10px] font-mono text-slate-300 space-x-1 text-right">
-                <span title="Tree Pollen">T: {currentWeather.pollen?.tree ?? 1.5}</span>
-                <span title="Grass Pollen">G: {currentWeather.pollen?.grass ?? 1.2}</span>
-                <span title="Weed Pollen">W: {currentWeather.pollen?.weed ?? 0.8}</span>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300 font-medium">Grass:</span>
+                <span className={`font-bold font-mono ${getPollenStatus(currentWeather.pollen?.grassLevel || 'Low').color}`}>
+                  {currentWeather.pollen?.grassLevel || 'Low'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300 font-medium">Ragweed:</span>
+                <span className={`font-bold font-mono ${getPollenStatus(currentWeather.pollen?.ragweedLevel || 'Low').color}`}>
+                  {currentWeather.pollen?.ragweedLevel || 'Low'}
+                </span>
               </div>
             </div>
+
             <div className="w-full bg-[#102035] h-1.5 rounded-full overflow-hidden">
               <div
                 className="bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 h-full transition-all"
-                style={{ width: `${Math.min(100, Math.max(8, ((currentWeather.pollen?.overallIndex ?? 1.8) / 5) * 100))}%` }}
+                style={{
+                  width: `${
+                    (currentWeather.pollen?.overallLevel === 'High' ? 100
+                      : currentWeather.pollen?.overallLevel === 'Moderate' ? 66
+                      : currentWeather.pollen?.overallLevel === 'Low' ? 33
+                      : 10)
+                  }%`
+                }}
               />
             </div>
           </div>
@@ -441,28 +439,115 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
             </div>
           </div>
 
-          {/* Sunrise / Sunset */}
-          <div className={`${metricCardBg} rounded-xl p-3.5 flex flex-col justify-between`}>
-            <div className="flex items-center justify-between text-slate-300 text-xs font-semibold">
-              <span className="flex items-center gap-1">
-                <Sunrise size={14} className="text-amber-400" /> Sun Cycle
-              </span>
-            </div>
-            <div className="flex items-center justify-between my-1 text-xs">
-              <div className="flex items-center gap-1">
-                <Sunrise size={14} className="text-amber-400" />
-                <span className="font-bold text-white">{currentWeather.sunriseTime}</span>
+          {/* Sunrise / Sunset Card matching picture */}
+          {(() => {
+            const parseTimeToMinutes = (timeStr?: string): number => {
+              if (!timeStr) return 360;
+              const clean = timeStr.trim().toLowerCase();
+              const match = clean.match(/(\d+):(\d+)\s*(am|pm)?/);
+              if (!match) return 360;
+              let hours = parseInt(match[1], 10);
+              const minutes = parseInt(match[2], 10);
+              const ampm = match[3];
+              if (ampm === 'pm' && hours < 12) hours += 12;
+              if (ampm === 'am' && hours === 12) hours = 0;
+              return hours * 60 + minutes;
+            };
+
+            const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+            const riseMinutes = parseTimeToMinutes(currentWeather.sunriseTime);
+            const setMinutes = parseTimeToMinutes(currentWeather.sunsetTime);
+
+            let dayProgress = 0.5;
+            if (setMinutes > riseMinutes) {
+              if (nowMinutes < riseMinutes) {
+                // Before sunrise: smooth transition approaching sunrise
+                const nightBefore = riseMinutes + (1440 - setMinutes);
+                const timeInNight = (1440 - setMinutes) + nowMinutes;
+                dayProgress = Math.max(-0.1, (timeInNight / nightBefore) - 0.1);
+              } else if (nowMinutes > setMinutes) {
+                // After sunset: smooth transition past sunset
+                const nightTotal = (1440 - setMinutes) + riseMinutes;
+                const timeInNight = nowMinutes - setMinutes;
+                dayProgress = Math.min(1.1, 1.0 + (timeInNight / nightTotal) * 0.1);
+              } else {
+                dayProgress = (nowMinutes - riseMinutes) / (setMinutes - riseMinutes);
+              }
+            }
+
+            const clampedProgress = Math.max(0, Math.min(1, dayProgress));
+
+            // Quadratic Bezier mapping P0=(8, 46), P1=(100, 8), P2=(192, 46)
+            // Sunrise dot at x=22 (t=0.0761), Sunset dot at x=178 (t=0.9239)
+            const tRise = 0.0761;
+            const tSet = 0.9239;
+            const t = tRise + clampedProgress * (tSet - tRise);
+
+            const sunX = Math.round(((1 - t) * (1 - t) * 8 + 2 * (1 - t) * t * 100 + t * t * 192) * 10) / 10;
+            const sunY = Math.round(((1 - t) * (1 - t) * 46 + 2 * (1 - t) * t * 8 + t * t * 46) * 10) / 10;
+
+            return (
+              <div className={`${metricCardBg} rounded-xl p-2.5 flex flex-col justify-between overflow-hidden relative`}>
+                {/* Header */}
+                <div className="flex items-center gap-1.5 text-slate-300 text-xs font-medium">
+                  <Sunrise size={14} className="text-amber-400" />
+                  <span>Sunrise · Sunset</span>
+                </div>
+
+                {/* Sunrise and Sunset Labels & Times placed at the outer edges */}
+                <div className="flex items-center justify-between px-1.5 my-0.5 relative z-10">
+                  <div className="flex flex-col items-start">
+                    <span className="text-[10px] text-slate-300 font-medium">Sunrise</span>
+                    <span className="text-sm sm:text-base font-extrabold text-white tracking-tight">{currentWeather.sunriseTime}</span>
+                  </div>
+
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] text-slate-300 font-medium">Sunset</span>
+                    <span className="text-sm sm:text-base font-extrabold text-white tracking-tight">{currentWeather.sunsetTime}</span>
+                  </div>
+                </div>
+
+                {/* Arc & Moving Sun SVG with dashed drop lines matching exact dot coordinates */}
+                <div className="relative w-full h-9 -mt-0.5 flex items-center justify-center">
+                  <svg viewBox="0 0 200 50" className="w-full h-full overflow-visible">
+                    {/* Dashed vertical drop lines from top labels to Sunrise/Sunset dots */}
+                    <line x1="22" y1="2" x2="22" y2="40.5" stroke="#94a3b8" strokeDasharray="2 2" strokeWidth="1" opacity="0.6" />
+                    <line x1="178" y1="2" x2="178" y2="40.5" stroke="#94a3b8" strokeDasharray="2 2" strokeWidth="1" opacity="0.6" />
+
+                    {/* Curved Sky Arc Path */}
+                    <path
+                      d="M 8 46 Q 100 8 192 46"
+                      fill="none"
+                      stroke="#475569"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+
+                    {/* Sunrise Dot beneath left drop line */}
+                    <circle cx="22" cy="40.5" r="3.5" fill="#0f172a" stroke="#94a3b8" strokeWidth="1.5" />
+
+                    {/* Sunset Dot beneath right drop line */}
+                    <circle cx="178" cy="40.5" r="3.5" fill="#0f172a" stroke="#94a3b8" strokeWidth="1.5" />
+
+                    {/* Dynamic Sun Orb moving on path depending on time of day */}
+                    <g style={{ transform: `translate(${sunX}px, ${sunY}px)` }} className="transition-transform duration-1000 ease-out">
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r="7.5"
+                        fill="#fbbf24"
+                        stroke="#fef08a"
+                        strokeWidth="2"
+                        className="drop-shadow-[0_0_8px_rgba(251,191,36,0.95)]"
+                      />
+                    </g>
+                  </svg>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Sunset size={14} className="text-orange-400" />
-                <span className="font-bold text-white">{currentWeather.sunsetTime}</span>
-              </div>
-            </div>
-            <div className="text-[11px] text-slate-300 font-mono truncate">
-              {currentWeather.isDaytime ? 'Sun in sky (Day)' : 'Night time'}
-            </div>
-          </div>
+            );
+          })()}
         </div>
+      </div>
       )}
     </div>
   );

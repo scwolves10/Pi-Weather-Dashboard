@@ -3,6 +3,7 @@ import {
   Home,
   CalendarDays,
   Map as MapIcon,
+  Newspaper,
   Settings,
   SunMedium,
   Moon,
@@ -10,11 +11,11 @@ import {
   Minimize,
   Radio,
 } from 'lucide-react';
-import { AppSettings } from '../types';
+import { AppSettings, ActivePageType } from '../types';
 
 interface NavigationProps {
-  activePage: 'main' | 'forecast' | 'map' | 'settings';
-  setActivePage: (page: 'main' | 'forecast' | 'map' | 'settings') => void;
+  activePage: ActivePageType;
+  setActivePage: (page: ActivePageType) => void;
   settings: AppSettings;
   onToggleNightMode: () => void;
   isFullscreen: boolean;
@@ -61,7 +62,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
         <button
           onClick={() => setActivePage('map')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer active:scale-95 ${
+          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer active:scale-95 ${
             activePage === 'map'
               ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/25 border border-orange-400/40'
               : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -69,6 +70,18 @@ export const Navigation: React.FC<NavigationProps> = ({
         >
           <MapIcon size={20} className={activePage === 'map' ? 'animate-pulse' : ''} />
           <span>Weather Map</span>
+        </button>
+
+        <button
+          onClick={() => setActivePage('news')}
+          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer active:scale-95 ${
+            activePage === 'news'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/25 border border-orange-400/40'
+              : 'text-slate-300 hover:text-white hover:bg-white/10'
+          }`}
+        >
+          <Newspaper size={20} className={activePage === 'news' ? 'animate-bounce' : ''} />
+          <span>News</span>
         </button>
 
         <button

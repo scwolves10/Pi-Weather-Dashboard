@@ -286,6 +286,49 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
           </div>
 
+          {/* Speed Unit Toggle (kph/mph) */}
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-300 font-medium">Wind Speed Unit</span>
+            <div className="flex bg-[#1A252F] p-1 rounded-lg border border-white/10 font-bold font-mono">
+              <button
+                onClick={() =>
+                  onUpdateSettings({
+                    units: { ...settings.units, speed: 'mph' },
+                  })
+                }
+                className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+                  settings.units.speed === 'mph' ? 'bg-orange-500 text-white' : 'text-slate-400'
+                }`}
+              >
+                MPH
+              </button>
+              <button
+                onClick={() =>
+                  onUpdateSettings({
+                    units: { ...settings.units, speed: 'kmh' },
+                  })
+                }
+                className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+                  settings.units.speed === 'kmh' ? 'bg-orange-500 text-white' : 'text-slate-400'
+                }`}
+              >
+                KPH
+              </button>
+              <button
+                onClick={() =>
+                  onUpdateSettings({
+                    units: { ...settings.units, speed: 'ms' },
+                  })
+                }
+                className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+                  settings.units.speed === 'ms' ? 'bg-orange-500 text-white' : 'text-slate-400'
+                }`}
+              >
+                m/s
+              </button>
+            </div>
+          </div>
+
           {/* Clock Format Toggle */}
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-300 font-medium">Clock Format</span>
