@@ -132,55 +132,69 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
               </div>
             </div>
 
-            {/* Comfort Status Badge */}
+            {/* Sensor Connection Status Badge */}
             <span
-              className={`text-xs font-bold px-3 py-1 rounded-full border ${indoorComfort.color}`}
+              className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                dhtData.status === 'offline'
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+              }`}
             >
-              {indoorComfort.status}
+              {dhtData.status === 'offline' ? 'Disconnected' : 'Connected'}
             </span>
           </div>
 
           {/* Main Temperature & Humidity Readings */}
-          <div className="grid grid-cols-2 gap-4 my-4">
-            {/* Indoor Temperature */}
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 text-slate-300 text-xs font-semibold uppercase tracking-wider">
-                <Thermometer size={16} className={isDay ? 'text-amber-300' : 'text-emerald-400'} />
-                <span>Indoor Temp</span>
+          {dhtData.status !== 'offline' ? (
+            <div className="grid grid-cols-2 gap-4 my-4">
+              {/* Indoor Temperature */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5 text-slate-300 text-xs font-semibold uppercase tracking-wider">
+                  <Thermometer size={16} className={isDay ? 'text-amber-300' : 'text-emerald-400'} />
+                  <span>Indoor Temp</span>
+                </div>
+                <div className="text-4xl sm:text-5xl font-black tracking-tight text-white mt-2">
+                  {formatTemp(dhtData.temperature, settings.units.temp)}
+                </div>
               </div>
-              <div className="text-4xl sm:text-5xl font-black tracking-tight text-white mt-1">
-                {formatTemp(dhtData.temperature, settings.units.temp)}
-              </div>
-              <div className="text-xs text-slate-300 font-mono mt-1">
-                Feels like: {formatTemp(indoorHeatIndex, settings.units.temp)}
-              </div>
-            </div>
 
-            {/* Indoor Humidity */}
-            <div className="flex flex-col border-l border-white/10 pl-4">
-              <div className="flex items-center gap-1.5 text-slate-300 text-xs font-semibold uppercase tracking-wider">
-                <Droplets size={16} className={isDay ? 'text-sky-300' : 'text-orange-400'} />
-                <span>Humidity</span>
-              </div>
-              <div className="text-4xl sm:text-5xl font-black tracking-tight text-orange-200 mt-1">
-                {dhtData.humidity}%
-              </div>
-              <div className="text-xs text-slate-300 font-mono mt-1">
-                Dew point: {formatTemp(dhtData.temperature - (100 - dhtData.humidity) / 5, settings.units.temp)}
+              {/* Indoor Humidity */}
+              <div className="flex flex-col border-l border-white/10 pl-4">
+                <div className="flex items-center gap-1.5 text-slate-300 text-xs font-semibold uppercase tracking-wider">
+                  <Droplets size={16} className={isDay ? 'text-sky-300' : 'text-orange-400'} />
+                  <span>Humidity</span>
+                </div>
+                <div className="text-4xl sm:text-5xl font-black tracking-tight text-orange-200 mt-2">
+                  {dhtData.humidity}%
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="my-4 text-center py-4 px-3 bg-black/20 rounded-xl border border-white/5 space-y-2">
+              <p className="text-sm text-slate-300 font-medium">DHT11 Sensor Disconnected</p>
+              <p className="text-xs text-slate-400">Plug in sensor to view live indoor temperature & humidity</p>
+              <button
+                type="button"
+                onClick={onOpenSettings}
+                className="mt-1 inline-flex items-center gap-1.5 text-xs bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-lg border border-emerald-500/30 transition-colors cursor-pointer font-medium"
+              >
+                <span>View Raspberry Pi Setup Guide</span>
+              </button>
+            </div>
+          )}
 
           {/* Indoor Card Footer */}
           <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-            <span className="truncate">{indoorComfort.description}</span>
+            <span className="font-mono text-[11px] text-slate-300">
+              GPIO Pin {dhtData.gpioPin}
+            </span>
             <span className="font-mono text-[11px] shrink-0 text-emerald-400">
-              ● Live Reading
+              {dhtData.status !== 'offline' ? '● Live Sensor Feed' : '○ Standby'}
             </span>
           </div>
         </div>
 
-        {/* Outdoor Weather Card (OpenWeatherMap / Open-Meteo) */}
+        {/* Outdoor Weather Card (api.weather.gov) */}
         <div className={`${cardBg} rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between group`}>
           {/* Subtle outdoor sunlit / twilight gradient accent */}
           <div
@@ -206,7 +220,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
                   {currentWeather?.locationName || settings.location.name}
                 </h2>
                 <p className="text-xs text-slate-300 font-mono flex items-center gap-1">
-                  <span>{import.meta.env.VITE_OPENWEATHER_API_KEY ? 'OpenWeather API' : 'Open-Meteo'}</span>
+                  <span>api.weather.gov</span>
                   {isDay ? (
                     <span className="text-[10px] text-amber-300 font-bold bg-amber-400/20 px-1.5 py-0.2 rounded border border-amber-300/30">
                       Day
@@ -409,15 +423,24 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({
                 {getUvRiskLevel(currentWeather.uvIndex).level}
               </span>
             </div>
-            <div className="my-1">
+            <div className="my-1 flex items-baseline justify-between">
               <span className="text-xl sm:text-2xl font-bold text-white">
-                {currentWeather.uvIndex} <span className="text-xs font-normal text-slate-300">/ 12</span>
+                {currentWeather.uvIndex} <span className="text-xs font-normal text-slate-300">/ 10</span>
               </span>
+              {currentWeather.uvIndex >= 11 && (
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 px-2 py-0.5 rounded-full animate-pulse">
+                  Extreme Alert
+                </span>
+              )}
             </div>
             <div className="w-full bg-[#102035] h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500 h-full transition-all"
-                style={{ width: `${Math.min(100, (currentWeather.uvIndex / 12) * 100)}%` }}
+                className={`h-full transition-all ${
+                  currentWeather.uvIndex >= 11
+                    ? 'bg-gradient-to-r from-red-500 via-purple-500 to-pink-500 animate-pulse'
+                    : 'bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500'
+                }`}
+                style={{ width: `${Math.min(100, (currentWeather.uvIndex / 10) * 100)}%` }}
               />
             </div>
           </div>

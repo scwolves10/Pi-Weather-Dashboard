@@ -148,5 +148,5 @@ export function getUvRiskLevel(uvIndex: number): {
   if (uvIndex <= 5) return { level: 'Moderate', color: 'text-yellow-400' };
   if (uvIndex <= 7) return { level: 'High', color: 'text-orange-400' };
   if (uvIndex <= 10) return { level: 'Very High', color: 'text-red-400' };
-  return { level: 'Extreme', color: 'text-purple-400' };
+  return { level: 'Extreme', color: 'text-purple-400 animate-pulse' };
 }

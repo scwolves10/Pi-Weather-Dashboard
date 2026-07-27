@@ -1053,32 +1053,23 @@ async function fetchFromOpenMeteo(
 export async function fetchWeatherData(
   lat: number,
   lon: number,
-  locationName: string,
-  apiKey?: string
+  locationName: string
 ): Promise<{
   current: CurrentWeather;
   hourly: HourlyForecast[];
   daily: DailyForecast[];
   alerts: WeatherAlert[];
 }> {
-  // First try National Weather Service API (api.weather.gov)
+  // Primary: National Weather Service API (api.weather.gov)
   try {
     const nwsData = await fetchFromNWS(lat, lon, locationName);
     if (nwsData && nwsData.current) {
       return nwsData;
     }
   } catch (err) {
-    console.warn('api.weather.gov API call failed or location outside US, attempting fallback:', err);
+    console.warn('api.weather.gov call failed or location outside US coverage, falling back to Open-Meteo:', err);
   }
 
-  const effectiveKey = apiKey || (import.meta.env.VITE_OPENWEATHER_API_KEY as string) || '';
-  if (effectiveKey && effectiveKey.trim().length > 10) {
-    try {
-      return await fetchFromOpenWeatherMap(effectiveKey.trim(), lat, lon, locationName);
-    } catch (err) {
-      console.warn('OpenWeatherMap failed, falling back to Open-Meteo:', err);
-      return await fetchFromOpenMeteo(lat, lon, locationName);
-    }
-  }
+  // Fallback: Open-Meteo for international locations or offline coverage
   return await fetchFromOpenMeteo(lat, lon, locationName);
 }

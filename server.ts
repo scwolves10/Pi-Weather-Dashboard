@@ -28,10 +28,10 @@ async function startServer() {
 
   // In-memory store for real Raspberry Pi DHT11 sensor payloads
   let latestDhtReading = {
-    temperature: 22.1,
-    humidity: 48.5,
+    temperature: null as number | null,
+    humidity: null as number | null,
     timestamp: new Date().toISOString(),
-    source: "simulator",
+    source: "offline",
   };
 
   // Attempt dynamic load of node-dht-sensor on Raspberry Pi Linux environments
@@ -51,6 +51,7 @@ async function startServer() {
     const threeMinsAgo = Date.now() - 3 * 60 * 1000;
     if (
       latestDhtReading.source.startsWith("hardware") &&
+      latestDhtReading.temperature !== null &&
       new Date(latestDhtReading.timestamp).getTime() > threeMinsAgo
     ) {
       return res.json(latestDhtReading);
@@ -80,8 +81,13 @@ async function startServer() {
       }
     }
 
-    // 3) Default simulation fallback if physical sensor not attached or unreadable
-    res.json(latestDhtReading);
+    // 3) Default offline when physical sensor not attached or unreadable
+    res.json({
+      temperature: null,
+      humidity: null,
+      timestamp: new Date().toISOString(),
+      source: "offline",
+    });
   });
 
   // API Route: Post real DHT11 sensor reading from Raspberry Pi Python script

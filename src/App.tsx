@@ -32,8 +32,8 @@ const DEFAULT_SETTINGS: AppSettings = {
     gpioPin: 4,
     offsetTemp: 0,
     offsetHumidity: 0,
-    simulationMode: true,
-    updateIntervalSec: 5,
+    simulationMode: false,
+    updateIntervalSec: 3,
   },
   display: {
     brightness: 100,
@@ -76,11 +76,20 @@ export default function App() {
 
   // Indoor DHT11 Sensor State
   const [dhtData, setDhtData] = useState<DHT11Data>(() =>
-    dht11Simulator.generateReading(
-      settings.dht11.offsetTemp,
-      settings.dht11.offsetHumidity,
-      settings.dht11.gpioPin
-    )
+    settings.dht11.simulationMode
+      ? dht11Simulator.generateReading(
+          settings.dht11.offsetTemp,
+          settings.dht11.offsetHumidity,
+          settings.dht11.gpioPin
+        )
+      : {
+          temperature: 0,
+          humidity: 0,
+          status: 'offline',
+          lastReading: new Date(),
+          gpioPin: settings.dht11.gpioPin,
+          errorCount: 0,
+        }
   );
 
   // Auto 5-Minute Refresh Countdown Timer
@@ -173,7 +182,12 @@ export default function App() {
         const res = await fetch(`/api/dht11?pin=${settings.dht11.gpioPin}`);
         if (res.ok) {
           const apiReading = await res.json();
-          if (apiReading && apiReading.source && apiReading.source !== 'simulator') {
+          if (
+            apiReading &&
+            apiReading.source &&
+            apiReading.source !== 'offline' &&
+            typeof apiReading.temperature === 'number'
+          ) {
             setDhtData({
               temperature: Math.round((apiReading.temperature + settings.dht11.offsetTemp) * 10) / 10,
               humidity: Math.round((apiReading.humidity + settings.dht11.offsetHumidity) * 10) / 10,
@@ -186,16 +200,28 @@ export default function App() {
           }
         }
       } catch (e) {
-        // Fall back to simulator if API unavailable
+        // Fall back
       }
 
-      // Simulator reading
-      const reading = dht11Simulator.generateReading(
-        settings.dht11.offsetTemp,
-        settings.dht11.offsetHumidity,
-        settings.dht11.gpioPin
-      );
-      setDhtData(reading);
+      // If simulation mode enabled in Settings, generate simulated reading
+      if (settings.dht11.simulationMode) {
+        const reading = dht11Simulator.generateReading(
+          settings.dht11.offsetTemp,
+          settings.dht11.offsetHumidity,
+          settings.dht11.gpioPin
+        );
+        setDhtData(reading);
+      } else {
+        // Real hardware sensor disconnected / offline
+        setDhtData({
+          temperature: 0,
+          humidity: 0,
+          status: 'offline',
+          lastReading: new Date(),
+          gpioPin: settings.dht11.gpioPin,
+          errorCount: 0,
+        });
+      }
     }, settings.dht11.updateIntervalSec * 1000);
 
     return () => clearInterval(interval);
@@ -203,6 +229,7 @@ export default function App() {
     settings.dht11.offsetTemp,
     settings.dht11.offsetHumidity,
     settings.dht11.gpioPin,
+    settings.dht11.simulationMode,
     settings.dht11.updateIntervalSec,
   ]);
 
